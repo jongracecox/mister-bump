@@ -52,7 +52,7 @@ This can be used for different versioning schemes.  For example, you may want to
 post release versions, rather than pre-release versions.
 
 ```
-[08:19:24 user@localhost mister-bump]$ get-git-version --style dev --no-increment
+[08:19:24 user@localhost mister-bump]$ get-git-version --style .dev --no-increment
 0.3.0.dev1
 ```
 

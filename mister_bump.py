@@ -12,6 +12,7 @@ from subprocess import check_output, CalledProcessError
 logger = logging.getLogger(__name__)
 
 DEFAULT_VERSION = 'release-0.0.0-1'
+DEFAULT_STYLE = 'rc'
 
 
 def git_describe(**kwargs):
@@ -292,7 +293,8 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description="Get appropriate project version number based on Git status.")
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output.')
-    parser.add_argument('-s', '--style', type=str, help='Style of suffix.', choices=['rc', '.dev'], default='.dev')
+    parser.add_argument('-s', '--style', type=str, help='Style of suffix.', choices=['rc', '.dev'],
+                        default=DEFAULT_STYLE)
     parser.add_argument('override', nargs='?', default=None, help='Override version number.'
                         ' Must be in the format "release-0.0.0-000-aaaaaa".')
     parser.add_argument('-n', '--no-increment', action='store_true', help='Do not increment version number.')
@@ -349,7 +351,7 @@ def get_git_version(tags=None):
     return selected_version[0]
 
 
-def bump(style='.dev', override=None, no_increment=False):
+def bump(style=DEFAULT_STYLE, override=None, no_increment=False):
     """
     Return bumped version.
 
@@ -369,13 +371,13 @@ def bump(style='.dev', override=None, no_increment=False):
         release, we can assume this is for the next minor release.
 
         >>> bump(override='release-1.2.0-456-aaaaa')
-        '1.3.0.dev456'
+        '1.3.0rc456'
 
         Technically there should never be a "release" tag with a bugfix version number (``X.X.3``),
         but if there was, it should be handled like this.
 
         >>> bump(override='release-1.2.3-456-aaaaa')
-        '1.3.0.dev456'
+        '1.3.0rc456'
 
         Current version is a deviation of the ``bugfix-1.2.3`` tag.  Since it comes after the
         bugfix, we can assume this is for the next bugfix release.  Bug fixes are
@@ -384,7 +386,7 @@ def bump(style='.dev', override=None, no_increment=False):
         numbers.
 
         >>> bump(override='bugfix-1.2.3-456-aaaaa')
-        '1.2.4.dev456'
+        '1.2.4rc456'
 
         Current version is the ``bugfix-1.2.3`` tag, so return that version number.
         There is no need to refer to bugfix within the output version number since
@@ -414,7 +416,7 @@ def bump(style='.dev', override=None, no_increment=False):
         that goes into the next major version.
 
         >>> bump(override='release-1.2.0-final-456')
-        '2.0.0.dev456'
+        '2.0.0rc456'
 
         Current version is a deviation from the ``release-1.2.0.final`` tag.
         This tag is subtly different to the previous example in that is uses ``.final``
@@ -424,7 +426,7 @@ def bump(style='.dev', override=None, no_increment=False):
         that goes into the next major version.
 
         >>> bump(override='release-1.2.0.final-456')
-        '2.0.0.dev456'
+        '2.0.0rc456'
 
     """
     # Check for override
