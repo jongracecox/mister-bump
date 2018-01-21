@@ -1,5 +1,7 @@
 # Mister Bump
 
+![image](https://travis-ci.org/jongracecox/mister-bump.svg?branch=master)
+
 ## Introduction
 `mister_bump` is a Python-based tool for handling version numbering in Git projects.
 It can be used from within Python via import, or via the command line.
