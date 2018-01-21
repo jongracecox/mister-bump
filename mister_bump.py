@@ -99,18 +99,24 @@ def parse_version(version):
         dict: Version split into component parts
 
     Example:
-        >>> parse_version('release-0.5.0-459-ge02af')
-        {'deviation': '459', 'major': '0', 'hash': 'ge02af', 'bugfix': '0', 'type': 'release', 'minor': '5'}
-        >>> parse_version('release-0.5.0-459')
-        {'deviation': '459', 'major': '0', 'hash': '', 'bugfix': '0', 'type': 'release', 'minor': '5'}
-        >>> parse_version('release-0.5.0')
-        {'deviation': '', 'major': '0', 'hash': '', 'bugfix': '0', 'type': 'release', 'minor': '5'}
-        >>> parse_version('bugfix-0.5.0-459-ge02af')
-        {'deviation': '459', 'major': '0', 'hash': 'ge02af', 'bugfix': '0', 'type': 'bugfix', 'minor': '5'}
-        >>> parse_version('release-0.5.0-final')
-        {'deviation': '', 'major': '0', 'hash': '', 'bugfix': '0', 'type': 'final', 'minor': '5'}
-        >>> parse_version('release-0.5.0.final')
-        {'deviation': '', 'major': '0', 'hash': '', 'bugfix': '0', 'type': 'final', 'minor': '5'}
+        >>> parse_version('release-0.5.0-459-ge02af') == {'deviation': '459', 'major': '0', 'hash': 'ge02af',
+        ...     'bugfix': '0', 'type': 'release', 'minor': '5'}
+        True
+        >>> parse_version('release-0.5.0-459') == {'deviation': '459', 'major': '0', 'hash': '', 'bugfix': '0',
+        ...     'type': 'release', 'minor': '5'}
+        True
+        >>> parse_version('release-0.5.0') == {'deviation': '', 'major': '0', 'hash': '', 'bugfix': '0',
+        ...     'type': 'release', 'minor': '5'}
+        True
+        >>> parse_version('bugfix-0.5.0-459-ge02af') == {'deviation': '459', 'major': '0', 'hash': 'ge02af',
+        ...     'bugfix': '0', 'type': 'bugfix', 'minor': '5'}
+        True
+        >>> parse_version('release-0.5.0-final') == {'deviation': '', 'major': '0', 'hash': '', 'bugfix': '0',
+        ...     'type': 'final', 'minor': '5'}
+        True
+        >>> parse_version('release-0.5.0.final') == {'deviation': '', 'major': '0', 'hash': '', 'bugfix': '0',
+        ...     'type': 'final', 'minor': '5'}
+        True
 
     """
     # Split the version string up on . and - characters.
@@ -247,17 +253,21 @@ def increment_version(version, increment):
 
     Example:
         >>> increment_version({'type': 'release', 'major': '1', 'minor': '2', 'bugfix': '3',
-        ...                    'deviation': '459', 'hash': 'ge02af'}, 'minor')
-        {'deviation': '459', 'major': '1', 'hash': 'ge02af', 'bugfix': '0', 'type': 'release', 'minor': '3'}
+        ...                    'deviation': '459', 'hash': 'ge02af'}, 'minor') == {'deviation': '459',
+        ...                        'major': '1', 'hash': 'ge02af', 'bugfix': '0', 'type': 'release', 'minor': '3'}
+        True
         >>> increment_version({'type': 'release', 'major': '1', 'minor': '2', 'bugfix': '3',
-        ...                    'deviation': '459', 'hash': 'ge02af'}, 'major')
-        {'deviation': '459', 'major': '2', 'hash': 'ge02af', 'bugfix': '0', 'type': 'release', 'minor': '0'}
+        ...                    'deviation': '459', 'hash': 'ge02af'}, 'major') == {'deviation': '459', 'major': '2',
+        ...                        'hash': 'ge02af', 'bugfix': '0', 'type': 'release', 'minor': '0'}
+        True
         >>> increment_version({'type': 'release', 'major': '1', 'minor': '2', 'bugfix': '3',
-        ...                    'deviation': '459', 'hash': 'ge02af'}, 'bugfix')
-        {'deviation': '459', 'major': '1', 'hash': 'ge02af', 'bugfix': '4', 'type': 'release', 'minor': '2'}
+        ...                    'deviation': '459', 'hash': 'ge02af'}, 'bugfix') == {'deviation': '459', 'major': '1',
+        ...                        'hash': 'ge02af', 'bugfix': '4', 'type': 'release', 'minor': '2'}
+        True
         >>> increment_version({'type': 'release', 'major': '1', 'minor': '2', 'bugfix': '3',
-        ...                    'deviation': '459', 'hash': 'ge02af'}, None)
-        {'deviation': '459', 'major': '1', 'hash': 'ge02af', 'bugfix': '3', 'type': 'release', 'minor': '2'}
+        ...                    'deviation': '459', 'hash': 'ge02af'}, None) == {'deviation': '459', 'major': '1',
+        ...                        'hash': 'ge02af', 'bugfix': '3', 'type': 'release', 'minor': '2'}
+        True
 
     """
     if not increment:
