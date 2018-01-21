@@ -19,7 +19,6 @@ setup(
     options={
         'bdist_wheel': {'universal': True}
     },
-    platform=['any'],
     url='https://github.com/jongracecox/mister-bump',
     entry_points = {
         'console_scripts': ['get-git-version=mister_bump:main',
