@@ -15,7 +15,18 @@ DEFAULT_VERSION = 'release-0.0.0-1'
 DEFAULT_STYLE = 'rc'
 
 
-def git_describe(**kwargs):
+def git_fetch_origin():
+    """Fetch origin from git to make sure other tags are present."""
+    command = ['git', 'fetch', 'origin']
+    logger.debug('Fetching commit history from git')
+
+    logger.debug('Command: %s', ' '.join(command))
+
+    with open(os.devnull, 'w') as devnull:
+        return check_output(command, stderr=devnull).rstrip().decode('utf-8')
+
+
+def git_describe(options=None, **kwargs):
     """
     Run git describe and return output.
 
@@ -29,6 +40,12 @@ def git_describe(**kwargs):
     If the ``git describe`` command fails then DEFAULT_VERSION will be returned.
     """
     command = ['git', 'describe']
+
+    if options:
+        if not isinstance(options, list):
+            options = [options]
+        command.extend(options)
+
     logger.debug('Getting current git version')
     for arg in kwargs.keys():
         values = kwargs[arg]
@@ -319,7 +336,7 @@ def get_git_version(tags=None):
 
     logger.debug('Fetching all candidate upstream versions')
 
-    candidates = [git_describe(abbrev=4, match=t) for t in tags]
+    candidates = [git_describe(options='--tags', abbrev=4, match=t) for t in tags]
 
     logger.debug('Candidate versions: %s' % ', '.join(candidates))
 
@@ -435,6 +452,7 @@ def bump(style=DEFAULT_STYLE, override=None, no_increment=False):
         git_version = override
         logger.debug('Using override version "%s"', git_version)
     else:
+        git_fetch_origin()
         git_version = get_git_version()
 
     # Parse the version number into parts
