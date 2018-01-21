@@ -11,6 +11,7 @@ install:
 - pip install -U setuptools pip -r requirements.txt
 script:
 - python -m doctest -v mister_bump.py
+- python mister_bump.py --verbose
 deploy:
   provider: pypi
   user: jongracecox
