@@ -8,20 +8,20 @@ script:
 - python -m doctest -v mister_bump.py
 - git describe --tags
 - python mister_bump.py --verbose
-deploy:
-  provider: pypi
-  user: jongracecox
-  password:
-    secure: JhcvdTToOy0LhBO9c1LvyYONHyFuKgq169kV+KXVKio0L8eVc7yUwRuqO/mw8zziLAjyb5EdT+kEn46OhCi8dNkEORv1duC6K9MjQyUToULm2I3r2kkk8bN/os7xv7Px+QCbrH5QRtv2NbDXpaLWKvWZzO1tZtjH/2TkGGm14y6OMQqSMbvCk1HxnbakkdEM8LHyyl/vEe+0mGb/VtysP3yUcePmGdhbuszt+kBDWPGzYF7K30fPqpMNS+V7dBkib2EtS8h5/wDNrCsCnDssPGyfm2642IS5dTVpdyU2skZRs/sAdudQl0uJUOXzwx96fxcMpXd1N9DSwULC3bQnzJBV8a/SABeE09wy+k7ZFosZsyJfEdVSrd5fUFe/WXmZu/8F+i3B6pmQnkDMH6peaX9wPiEYPrwl0gGgq+vpNeyqD0UelfzA8TEqXyDfVLO6x/Wxd7LAci3I2cTaSi7GfUzrWkIFgdW877c2TqCmel51f7E3cdgHXaqOOaPbCMSsdxsIibzACjnVBwdOTpmCiHArwkLECLCEerQf2pdGnxQUJYXBY18p7O6oBC+GEHOFZMmk/9UlpRE6cf3mHr3BWUGTL++mYFSd65zyP2uVzyE1XeyN2LIv1+SiGRNREDKMJIdDiu+Ubic2s0AkP03K8wFR8faLXo4rwnp8BA8k8Es=
-  distributions: sdist bdist_wheel
-  on:
-    tags: true
-    all_branches: true
-deploy:
-  provider: pypi
-  user: jongracecox
-  password:
-    secure: JhcvdTToOy0LhBO9c1LvyYONHyFuKgq169kV+KXVKio0L8eVc7yUwRuqO/mw8zziLAjyb5EdT+kEn46OhCi8dNkEORv1duC6K9MjQyUToULm2I3r2kkk8bN/os7xv7Px+QCbrH5QRtv2NbDXpaLWKvWZzO1tZtjH/2TkGGm14y6OMQqSMbvCk1HxnbakkdEM8LHyyl/vEe+0mGb/VtysP3yUcePmGdhbuszt+kBDWPGzYF7K30fPqpMNS+V7dBkib2EtS8h5/wDNrCsCnDssPGyfm2642IS5dTVpdyU2skZRs/sAdudQl0uJUOXzwx96fxcMpXd1N9DSwULC3bQnzJBV8a/SABeE09wy+k7ZFosZsyJfEdVSrd5fUFe/WXmZu/8F+i3B6pmQnkDMH6peaX9wPiEYPrwl0gGgq+vpNeyqD0UelfzA8TEqXyDfVLO6x/Wxd7LAci3I2cTaSi7GfUzrWkIFgdW877c2TqCmel51f7E3cdgHXaqOOaPbCMSsdxsIibzACjnVBwdOTpmCiHArwkLECLCEerQf2pdGnxQUJYXBY18p7O6oBC+GEHOFZMmk/9UlpRE6cf3mHr3BWUGTL++mYFSd65zyP2uVzyE1XeyN2LIv1+SiGRNREDKMJIdDiu+Ubic2s0AkP03K8wFR8faLXo4rwnp8BA8k8Es=
-  distributions: sdist bdist_wheel
-  on:
-    branch: master
+  - deploy:
+      provider: pypi
+      user: jongracecox
+      password:
+        secure: JhcvdTToOy0LhBO9c1LvyYONHyFuKgq169kV+KXVKio0L8eVc7yUwRuqO/mw8zziLAjyb5EdT+kEn46OhCi8dNkEORv1duC6K9MjQyUToULm2I3r2kkk8bN/os7xv7Px+QCbrH5QRtv2NbDXpaLWKvWZzO1tZtjH/2TkGGm14y6OMQqSMbvCk1HxnbakkdEM8LHyyl/vEe+0mGb/VtysP3yUcePmGdhbuszt+kBDWPGzYF7K30fPqpMNS+V7dBkib2EtS8h5/wDNrCsCnDssPGyfm2642IS5dTVpdyU2skZRs/sAdudQl0uJUOXzwx96fxcMpXd1N9DSwULC3bQnzJBV8a/SABeE09wy+k7ZFosZsyJfEdVSrd5fUFe/WXmZu/8F+i3B6pmQnkDMH6peaX9wPiEYPrwl0gGgq+vpNeyqD0UelfzA8TEqXyDfVLO6x/Wxd7LAci3I2cTaSi7GfUzrWkIFgdW877c2TqCmel51f7E3cdgHXaqOOaPbCMSsdxsIibzACjnVBwdOTpmCiHArwkLECLCEerQf2pdGnxQUJYXBY18p7O6oBC+GEHOFZMmk/9UlpRE6cf3mHr3BWUGTL++mYFSd65zyP2uVzyE1XeyN2LIv1+SiGRNREDKMJIdDiu+Ubic2s0AkP03K8wFR8faLXo4rwnp8BA8k8Es=
+      distributions: sdist bdist_wheel
+      on:
+        tags: true
+        all_branches: true
+  - deploy:
+      provider: pypi
+      user: jongracecox
+      password:
+        secure: JhcvdTToOy0LhBO9c1LvyYONHyFuKgq169kV+KXVKio0L8eVc7yUwRuqO/mw8zziLAjyb5EdT+kEn46OhCi8dNkEORv1duC6K9MjQyUToULm2I3r2kkk8bN/os7xv7Px+QCbrH5QRtv2NbDXpaLWKvWZzO1tZtjH/2TkGGm14y6OMQqSMbvCk1HxnbakkdEM8LHyyl/vEe+0mGb/VtysP3yUcePmGdhbuszt+kBDWPGzYF7K30fPqpMNS+V7dBkib2EtS8h5/wDNrCsCnDssPGyfm2642IS5dTVpdyU2skZRs/sAdudQl0uJUOXzwx96fxcMpXd1N9DSwULC3bQnzJBV8a/SABeE09wy+k7ZFosZsyJfEdVSrd5fUFe/WXmZu/8F+i3B6pmQnkDMH6peaX9wPiEYPrwl0gGgq+vpNeyqD0UelfzA8TEqXyDfVLO6x/Wxd7LAci3I2cTaSi7GfUzrWkIFgdW877c2TqCmel51f7E3cdgHXaqOOaPbCMSsdxsIibzACjnVBwdOTpmCiHArwkLECLCEerQf2pdGnxQUJYXBY18p7O6oBC+GEHOFZMmk/9UlpRE6cf3mHr3BWUGTL++mYFSd65zyP2uVzyE1XeyN2LIv1+SiGRNREDKMJIdDiu+Ubic2s0AkP03K8wFR8faLXo4rwnp8BA8k8Es=
+      distributions: sdist bdist_wheel
+      on:
+        branch: master
