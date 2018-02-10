@@ -528,6 +528,12 @@ def bump(style=DEFAULT_STYLE, override=None, no_increment=False, prefix=None):
     return formatted_version
 
 
+def test():
+    # Test function
+    import doctest
+    doctest.testmod()
+
+
 def main():
     """
     Run getversion to get the next version number.

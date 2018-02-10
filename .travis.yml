@@ -6,7 +6,8 @@ python:
 install:
 - pip install -U setuptools pip -r requirements.txt -r build-requirements.txt
 script:
-- python -m doctest -v mister_bump.py
+- coverage run -m doctest -v mister_bump.py
+- coverage report -m
 - git describe --tags
 - python mister_bump.py --verbose
 deploy:
