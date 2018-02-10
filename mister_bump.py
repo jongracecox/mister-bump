@@ -58,7 +58,7 @@ def git_describe(options=None, **kwargs):
     with open(os.devnull, 'w') as devnull:
         try:
             return check_output(command, stderr=devnull).rstrip().decode('utf-8')
-        except CalledProcessError as e:
+        except CalledProcessError:
             logger.debug('No upstream refs found, so returning default version.')
             return DEFAULT_VERSION
 
@@ -79,11 +79,17 @@ def get_git_branch():
     return branch
 
 
-def is_bugfix_branch(branch_name):
+def is_bugfix_branch(branch_name, prefix=''):
     """
     Return True if current branch is bugfix branch.
 
     Identified by the fact that the current branch matches ``bugfix-X-X-X``.
+
+    Args:
+        branch_name(str): Name of branch, as retrieved from git.
+        prefix(str): Tag / branch prefix.  This is a prefix that you expect to appear
+            in front of the tag or branch name.  For example, in branch ``fred/bugfix-1.2.3`` the
+            prefix would be ``fred/`` - Note that the trailing ``/`` is included in the prefix.
 
     Example:
         >>> is_bugfix_branch('release-0.1.0')
@@ -98,20 +104,27 @@ def is_bugfix_branch(branch_name):
         True
         >>> is_bugfix_branch('bugfix-1234.13123.45676.something')
         False
+        >>> is_bugfix_branch('fred/bugfix-0.1.0')
+        False
+        >>> is_bugfix_branch('fred/bugfix-0.1.0', prefix='fred/')
+        True
     """
-    result = re.match(r'^bugfix-[0-9]+\.[0-9]+\.[0-9]+$', branch_name) is not None
+    result = re.match(r'^%sbugfix-[0-9]+\.[0-9]+\.[0-9]+$' % prefix, branch_name) is not None
 
     logger.debug('Current branch is bugfix? %s', str(result))
 
     return result
 
 
-def parse_version(version):
+def parse_version(version, prefix=''):
     """
     Split the version string into components.
 
     Args:
         version(str): Unformatted version number, as returned by git_describe function.
+        prefix(str): Tag / branch prefix.  This is a prefix that you expect to appear
+            in front of the tag or branch name.  For example, in branch ``fred/bugfix-1.2.3`` the
+            prefix would be ``fred/`` - Note that the trailing ``/`` is included in the prefix.
 
     Returns:
         dict: Version split into component parts
@@ -135,8 +148,17 @@ def parse_version(version):
         >>> parse_version('release-0.5.0.final') == {'deviation': '', 'major': '0', 'hash': '', 'bugfix': '0',
         ...     'type': 'final', 'minor': '5'}
         True
+        >>> parse_version('fred/release-0.5.0-459-ge02af', prefix='fred/') == {'deviation': '459', 'major': '0',
+        ...     'hash': 'ge02af', 'bugfix': '0', 'type': 'release', 'minor': '5'}
+        True
 
     """
+    # Strip off the prefix
+    if prefix:
+        logger.debug('Stripping prefix "%s" from "%s".', prefix, version)
+        version = re.sub(r'^%s' % prefix, '', version)
+        logger.debug('New version is "%s".', version)
+
     # Split the version string up on . and - characters.
     parts = re.split(r'[-.]', version)
 
@@ -219,12 +241,15 @@ def format_version(version, style='rc'):
     return version_str
 
 
-def get_increment_type(version):
+def get_increment_type(version, prefix=''):
     """
     Return the appropriate increment type based on the current version.
 
     Args:
         version(str): Unformatted version number, as returned by git_describe function.
+        prefix(str): Tag / branch prefix.  This is a prefix that you expect to appear
+            in front of the tag or branch name.  For example, in branch ``fred/bugfix-1.2.3`` the
+            prefix would be ``fred/`` - Note that the trailing ``/`` is included in the prefix.
 
     Returns:
         str: Type of version increment to be performed (``major``, ``minor``, ``bugfix``).
@@ -241,9 +266,11 @@ def get_increment_type(version):
         >>> get_increment_type('release-0.5.0-final-459-ge02af')
         'major'
         >>> get_increment_type('blahblahblah')
+        >>> get_increment_type('fred/release-0.5.0-459-ge02af', prefix='fred/')
+        'minor'
 
     """
-    version_dict = parse_version(version)
+    version_dict = parse_version(version, prefix=prefix)
 
     # If there is no deviation from the previous release then this IS the release.
     if not version_dict['deviation']:
@@ -267,7 +294,7 @@ def increment_version(version, increment):
 
     Args:
         version(dict): Parsed version number, as returned by parse_version function.
-        increment(str): Type of version increment to be performed (``major``, ``minor``, ``bugfix``).
+        increment(str, optional): Type of version increment to be performed (``major``, ``minor``, ``bugfix``).
 
     Example:
         >>> increment_version({'type': 'release', 'major': '1', 'minor': '2', 'bugfix': '3',
@@ -307,7 +334,7 @@ def increment_version(version, increment):
 
 
 def parse_args():
-
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Get appropriate project version number based on Git status.")
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output.')
     parser.add_argument('-s', '--style', type=str, help='Style of suffix.', choices=['rc', '.dev'],
@@ -315,24 +342,36 @@ def parse_args():
     parser.add_argument('override', nargs='?', default=None, help='Override version number.'
                         ' Must be in the format "release-0.0.0-000-aaaaaa".')
     parser.add_argument('-n', '--no-increment', action='store_true', help='Do not increment version number.')
+    parser.add_argument('-p', '--prefix', type=str, default=None,
+                        help='Optionally specify a prefix that you expect to appear before the "release-X.X.X" tag. '
+                             'For example if your tag was "fred/release-0.1.0" then you would use '
+                             'a PREFIX of "fred/".')
 
     return parser.parse_args()
 
 
-def get_git_version(tags=None):
+def get_git_version(tags=None, prefix=None):
     """
     Get the current version from git.
 
     This involves using ``git describe`` to fetch the distance from the specified tags.
 
     Args:
-         tags(list of str): List of tags to search git for.
+        tags(list of str): List of tags to search git for.
+        prefix(str, optional): Specify a prefix that you expect to appear before the
+            "release-X.X.X" tag.
 
     Returns:
         str: Unparsed verison string.
     """
     if not tags:
         tags = ['release-*']
+
+    if prefix:
+        logger.debug('Adding prefix "%s" to all tags.', prefix)
+        tags = [prefix+t for t in tags]
+
+    logger.debug('Searching for the following tags: %s', ', '.join(tags))
 
     logger.debug('Fetching all candidate upstream versions')
 
@@ -342,7 +381,7 @@ def get_git_version(tags=None):
 
     # Take the candidates list of strings and turn into a list
     # containing version string and parsed dict.
-    candidates = [[c, parse_version(c)] for c in candidates]
+    candidates = [[c, parse_version(c, prefix=prefix)] for c in candidates]
 
     selected_version = None
 
@@ -358,7 +397,8 @@ def get_git_version(tags=None):
 
     # Get current branch, and check whether we are on bugfix.
     # If so, then we will hack the selected version to be a 'bugfix' rather than 'release'.
-    if is_bugfix_branch(get_git_branch()):
+    if is_bugfix_branch(get_git_branch(), prefix=prefix):
+        # TODO: Decide whether we need to include prefix in the following sub call.
         selected_version[0] = re.sub('^release', 'bugfix', selected_version[0], count=1)
 
     # The selected candidate version string will be the first part of the tuple,
@@ -368,7 +408,7 @@ def get_git_version(tags=None):
     return selected_version[0]
 
 
-def bump(style=DEFAULT_STYLE, override=None, no_increment=False):
+def bump(style=DEFAULT_STYLE, override=None, no_increment=False, prefix=None):
     """
     Return bumped version.
 
@@ -378,6 +418,8 @@ def bump(style=DEFAULT_STYLE, override=None, no_increment=False):
         no_increment(bool): Do not actually bump the version, just return the current version.
             This might not seem useful, but it allows you to use ``bump`` to simply fetch the
             current git version, and reformat it.
+        prefix(str, optional): Specify a prefix that you expect to appear before the
+            "release-X.X.X" tag.
 
     Returns:
         str: Bumped version number in simplified output format (see examples).
@@ -445,6 +487,15 @@ def bump(style=DEFAULT_STYLE, override=None, no_increment=False):
         >>> bump(override='release-1.2.0.final-456')
         '2.0.0rc456'
 
+        When a prefix appears before the "release-X.X.X", a prefix should be passed.
+        This causes mister bump to search the git history for that specific tag, and will
+        result in that tags version number being retrieved and bumped.  This can be useful
+        for projects that have multiple components, allowing them to have different version
+        numbers.
+
+        >>> bump(override='fred/release-1.2.0.final-456', prefix='fred/')
+        '2.0.0rc456'
+
     """
     # Check for override
     # If there was a command line argument then we assume it is a version override.
@@ -453,16 +504,16 @@ def bump(style=DEFAULT_STYLE, override=None, no_increment=False):
         logger.debug('Using override version "%s"', git_version)
     else:
         git_fetch_origin()
-        git_version = get_git_version()
+        git_version = get_git_version(prefix=prefix)
 
     # Parse the version number into parts
-    version_dict = parse_version(git_version)
+    version_dict = parse_version(git_version, prefix=prefix)
 
     # Do not increment version numbers if override was passed.
     if not no_increment:
 
         # Detect the increment type, based on previous tag
-        increment_type = get_increment_type(git_version)
+        increment_type = get_increment_type(git_version, prefix=prefix)
 
         # Increment the version number based on increment type
         version_dict = increment_version(version_dict, increment_type)
@@ -492,7 +543,8 @@ def main():
                         format="%(asctime)s [%(name)s:%(lineno)d][%(levelname)s] %(message)s",
                         datefmt='%I:%M:%S')
 
-    print(bump(style=args.style, override=args.override, no_increment=args.no_increment))
+    print(bump(style=args.style, override=args.override, no_increment=args.no_increment,
+               prefix=args.prefix))
 
 
 if __name__ == '__main__':
