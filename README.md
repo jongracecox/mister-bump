@@ -1,6 +1,6 @@
 # Mister Bump
 
-![image](https://travis-ci.org/jongracecox/mister-bump.svg?branch=master)
+[![image](https://travis-ci.org/jongracecox/mister-bump.svg?branch=master)](https://travis-ci.org/jongracecox/mister-bump)
 
 ## Introduction
 `mister_bump` is a Python-based tool for handling version numbering in Git projects.
@@ -296,3 +296,25 @@ setup(
     ...
     )
 ```
+
+## Multiple version numbers in one project
+
+In rare instances you may want to manage version numbers for multiple deliverables
+within one project, and you may want them to be versioned independently.  This is supported
+in `mister-bump` using the `--prefix` option.
+
+Lets imagine you have two packages within your project: `fred` and `barney`.  You could configure
+your CI pipeline to build and deploy those packages independently, based on the branch / tag names.
+For example, `fred` could be deployed from CI pipelines on tags starting with `fred/`
+(e.g. `fred/release-1.2.3`), and `barney` could be deployed from pipelines on branches starting with
+`barney/`.
+
+When running `mister-bump`, you can pass `--prefix='fred/'`, and `mister-bump` will fetch the latest
+version for `fred/`, increment the version number (according to the documentation above), and return
+the new version number.
+
+Some things to note:
+
+* If there is a `/` separating the prefix from the remainder of the tag, then you need to include
+  the trailing `/`.
+* The version number returned by `mister-bump` will not include the prefix.  It will just be `X.Y.ZrcN`
