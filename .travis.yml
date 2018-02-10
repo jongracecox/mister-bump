@@ -4,7 +4,7 @@ python:
 - '3.5'
 - '3.6'
 install:
-- pip install -U setuptools pip -r requirements.txt
+- pip install -U setuptools pip -r requirements.txt -r build-requirements.txt
 script:
 - python -m doctest -v mister_bump.py
 - git describe --tags

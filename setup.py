@@ -11,7 +11,7 @@ setup(
     version=mister_bump.bump(style='rc'),
     author='Jon Grace-Cox',
     author_email='jongracecox@gmail.com',
-    py_modules = ['mister_bump'],
+    py_modules=['mister_bump'],
     setup_requires=['setuptools', 'm2r'],
     tests_require=[],
     install_requires=[],
@@ -20,7 +20,7 @@ setup(
         'bdist_wheel': {'universal': True}
     },
     url='https://github.com/jongracecox/mister-bump',
-    entry_points = {
+    entry_points={
         'console_scripts': ['get-git-version=mister_bump:main',
                             'mister-bump=mister_bump:main'],
     }
