@@ -1,2 +1,4 @@
 m2r
 coverage
+restructuredtext_lint
+pygments
