@@ -7,7 +7,7 @@ import os
 import logging
 import re
 import argparse
-from subprocess import check_output, CalledProcessError
+from subprocess import check_output, CalledProcessError, STDOUT
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,12 @@ def git_fetch_origin():
     logger.debug('Command: %s', ' '.join(command))
 
     with open(os.devnull, 'w') as devnull:
-        return check_output(command, stderr=devnull).rstrip().decode('utf-8')
+        try:
+            return check_output(command, stderr=STDOUT).rstrip().decode('utf-8')
+        except CalledProcessError as e:
+            logger.error('Failed to fetch from origin.')
+            for line in e.output.split('\n'):
+                logger.error(line)
 
 
 def git_describe(options=None, **kwargs):
