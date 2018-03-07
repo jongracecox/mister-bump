@@ -24,7 +24,7 @@ pip install mister_bump
 
 Once installed via pip, you can use the command line interface `get-git-version`, or `mister-bump`.
 
-If you have downloaded the project source, you can call `mister_mump.py` using the
+If you have downloaded the project source, you can call `mister_bump.py` using the
 same syntax.
 
 *Note: You must call the script from inside the root directory of the Git project you want the version for.*
