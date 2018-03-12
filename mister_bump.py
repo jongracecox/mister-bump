@@ -7,7 +7,7 @@ import os
 import logging
 import re
 import argparse
-from subprocess import check_output, CalledProcessError, STDOUT
+from subprocess import Popen, CalledProcessError, STDOUT, PIPE
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +24,15 @@ def git_fetch_origin():
 
     with open(os.devnull, 'w') as devnull:
         try:
-            return check_output(command, stderr=STDOUT).rstrip().decode('utf-8')
+            # Use Popen for Python2.6 support
+            return Popen(command, stderr=STDOUT, stdout=PIPE).communicate()[0].rstrip().decode('utf-8')
+            # Python2.7 code would be
+            #   return check_output(command, stderr=STDOUT).rstrip().decode('utf-8')
         except CalledProcessError as e:
             logger.error('Failed to fetch from origin.')
             for line in e.output.split('\n'):
                 logger.error(line)
+            return None
 
 
 def git_describe(options=None, **kwargs):
@@ -62,7 +66,8 @@ def git_describe(options=None, **kwargs):
 
     with open(os.devnull, 'w') as devnull:
         try:
-            return check_output(command, stderr=devnull).rstrip().decode('utf-8')
+            # Use Popen instead of check_output for Python2.6 support
+            return Popen(command, stderr=devnull, stdout=PIPE).communicate()[0].rstrip().decode('utf-8')
         except CalledProcessError:
             logger.debug('No upstream refs found, so returning default version.')
             return DEFAULT_VERSION
@@ -78,7 +83,8 @@ def get_git_branch():
     try:
         branch = os.environ['CI_BUILD_REF_NAME']
     except KeyError:
-        branch = check_output('git rev-parse --abbrev-ref HEAD', shell=True).rstrip().decode('utf-8')
+        branch = Popen(['git', 'rev-parse', '--abrev-ref', 'HEAD'],
+                       shell=True, stdout=PIPE).communicate()[0].rstrip().decode('utf-8')
 
     logger.debug('Current git branch is %s', branch)
     return branch
