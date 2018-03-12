@@ -5,3 +5,5 @@ dist/
 *.egg-info/
 *.pyc
 .coverage
+venv/
+htmlcov/
