@@ -83,7 +83,7 @@ def get_git_branch():
     try:
         branch = os.environ['CI_BUILD_REF_NAME']
     except KeyError:
-        branch = Popen(['git', 'rev-parse', '--abrev-ref', 'HEAD'],
+        branch = Popen(['git rev-parse --abrev-ref HEAD'],
                        shell=True, stdout=PIPE).communicate()[0].rstrip().decode('utf-8')
 
     logger.debug('Current git branch is %s', branch)
