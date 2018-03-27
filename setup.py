@@ -1,8 +1,17 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 from setuptools import setup
 import mister_bump
 from m2r import parse_from_file
 import restructuredtext_lint
+import fileinput
+import re
+
+
+# Update version number in file
+def set_module_version(filename, version):
+    with fileinput.FileInput(filename, inplace=True, backup='.bak') as file:
+        for line in file:
+            print(re.sub(r"__version__ = '.*'", "__version__ = '%s'" % version, line), end='')
 
 
 # Parser README.md into reStructuredText format
@@ -17,11 +26,17 @@ if errors:
     raise ValueError('README.md contains errors: ',
                      ', '.join([e.message for e in errors]))
 
+# Get version number
+package_version = mister_bump.bump(style='rc')
+
+# Update __version__ variable inside module
+set_module_version('mister_bump.py', package_version)
+
 setup(
     name='mister-bump',
     description='Increment (bump) git version numbers for a project.',
     long_description=rst_readme,
-    version=mister_bump.bump(style='rc'),
+    version=package_version,
     author='Jon Grace-Cox',
     author_email='jongracecox@gmail.com',
     py_modules=['mister_bump'],
@@ -38,3 +53,6 @@ setup(
                             'mister-bump=mister_bump:main'],
     }
 )
+
+# Reset __version__ variable inside module
+set_module_version('mister_bump.py', '')

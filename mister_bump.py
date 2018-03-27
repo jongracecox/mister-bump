@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_VERSION = 'release-0.0.0-1'
 DEFAULT_STYLE = 'rc'
+__version__ = ''
 
 
 def git_fetch_origin():
@@ -67,7 +68,15 @@ def git_describe(options=None, **kwargs):
     with open(os.devnull, 'w') as devnull:
         try:
             # Use Popen instead of check_output for Python2.6 support
-            return Popen(command, stderr=devnull, stdout=PIPE).communicate()[0].rstrip().decode('utf-8')
+            describe_output = Popen(command, stderr=devnull, stdout=PIPE).communicate()[0].rstrip().decode('utf-8')
+
+            # If git describe command didn't return anything then return the default version.
+            # Otherwise return the command output.
+            if not describe_output:
+                return DEFAULT_VERSION
+
+            return describe_output
+
         except CalledProcessError:
             logger.debug('No upstream refs found, so returning default version.')
             return DEFAULT_VERSION
@@ -346,17 +355,20 @@ def increment_version(version, increment):
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Get appropriate project version number based on Git status.")
+    parser = argparse.ArgumentParser(description="Get appropriate project version number "
+                                                 "based on Git status.")
+    parser.add_argument('--version', action='version', version='%(prog)s ' + __version__)
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output.')
     parser.add_argument('-s', '--style', type=str, help='Style of suffix.', choices=['rc', '.dev'],
                         default=DEFAULT_STYLE)
     parser.add_argument('override', nargs='?', default=None, help='Override version number.'
                         ' Must be in the format "release-0.0.0-000-aaaaaa".')
-    parser.add_argument('-n', '--no-increment', action='store_true', help='Do not increment version number.')
+    parser.add_argument('-n', '--no-increment', action='store_true',
+                        help='Do not increment version number.')
     parser.add_argument('-p', '--prefix', type=str, default=None,
-                        help='Optionally specify a prefix that you expect to appear before the "release-X.X.X" tag. '
-                             'For example if your tag was "fred/release-0.1.0" then you would use '
-                             'a PREFIX of "fred/".')
+                        help='Optionally specify a prefix that you expect to appear before the '
+                             '"release-X.X.X" tag. For example if your tag was "fred/release-0.1.0"'
+                             ' then you would use a PREFIX of "fred/".')
 
     return parser.parse_args()
 
